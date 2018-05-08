@@ -1,19 +1,9 @@
-<style scoped>
-  .boys {
-    background-color: red;
-  }
-</style>
 <template>
-
-  <div id="app" class="boys">
-    boys got many things11111111
-  </div>
-
+    <div id="app">index</div>
 </template>
+
 <script>
-
-export default {
-  name: 'boys'
-}
-
+    export default {
+      name: 'Index',
+    }
 </script>

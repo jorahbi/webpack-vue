@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>detail</h1>
+        <h1>title</h1>
         <ul class="list">
             <li v-for="item in list" v-text="item.title"></li>
         </ul>
@@ -12,9 +12,9 @@
       data(){
         return {
           list: [
-            {title: 'detail_title1'},
-            {title: 'detail_title2'},
-            {title: 'detail_title3'}
+            {title: 'content_title1'},
+            {title: 'content_title2'},
+            {title: 'content_title3'}
           ]
         }
       },

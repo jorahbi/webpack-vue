@@ -1,7 +1,6 @@
 'use strict'
 const utils = require('./utils')
 const webpack = require('webpack')
-const glob = require('glob')
 const config = require('../config')
 const merge = require('webpack-merge')
 const path = require('path')
@@ -13,14 +12,7 @@ const portfinder = require('portfinder')
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
-const htmls = glob.sync('./src/pages/**/*.html').map(function (item) {
-    return new HtmlWebpackPlugin({
-        filename: './' + item.slice(6),
-        template: item,
-        inject: true,
-        chunks:[item.slice(2, -5)]
-    });
-});
+
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
@@ -60,7 +52,11 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     new webpack.NoEmitOnErrorsPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
-
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: 'index.html',
+      inject: true
+    }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -69,7 +65,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ])
-  ].concat(htmls)
+  ]
 })
 
 module.exports = new Promise((resolve, reject) => {

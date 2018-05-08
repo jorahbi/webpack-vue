@@ -1,7 +1,7 @@
 'use strict'
 const path = require('path')
-const glob = require('glob')
 const utils = require('./utils')
+const glob = require('glob');
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
 
@@ -10,22 +10,25 @@ function resolve (dir) {
 }
 
 const createLintingRule = () => ({
-  test: /\.(js|vue)$/,
+  /*test: /\.(js|vue)$/,
   loader: 'eslint-loader',
   enforce: 'pre',
   include: [resolve('src'), resolve('test')],
   options: {
     formatter: require('eslint-friendly-formatter'),
     emitWarning: !config.dev.showEslintErrorsInOverlay
-  }
+  }*/
 })
-const entryJS = glob.sync('./src/pages/**/*.js').reduce(function (prev, curr) {
-    prev[curr.slice(11, -3)] = curr;
-    return prev;
-}, {});
+let entryJs = {}
+// entryJs = glob.sync('./src/pages/**/*.js').reduce(function (prev, curr) {
+//   prev[curr.substring(12, curr.lastIndexOf('/'))] = curr;
+//   return prev;
+// }, {});
+entryJs['app'] = './src/main.js'
+
 module.exports = {
   context: path.resolve(__dirname, '../'),
-  entry: entryJS,
+  entry: entryJs,
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
