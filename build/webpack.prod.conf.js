@@ -15,12 +15,14 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const env = require('../config/prod.env')
 
 const htmls = glob.sync('./src/pages/**/*.html').map(function (item) {
-console.log('.' + item.slice(11));
+
+  let name = item.substring(12, item.lastIndexOf('/'));
+
   return new HtmlWebpackPlugin({
-    filename: '.' + item.slice(11),
+    filename: './' + name + '.html',
     template: item,
     inject: true,
-    chunks:['vendor', 'manifest', item.substring(12, item.lastIndexOf('/'))],
+    chunks:['vendor', 'manifest', name],
     minify: {
       removeComments: true,
       collapseWhitespace: true,

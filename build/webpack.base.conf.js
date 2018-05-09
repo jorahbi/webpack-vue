@@ -21,6 +21,7 @@ const createLintingRule = () => ({
 })
 let entryJs = {}
 // entryJs = glob.sync('./src/pages/**/*.js').reduce(function (prev, curr) {
+//
 //   prev[curr.substring(12, curr.lastIndexOf('/'))] = curr;
 //   return prev;
 // }, {});
