@@ -36,11 +36,11 @@
           rules: {
             uname: [
               { required: true, message: '请输入用户名', trigger: 'blur' },
-              { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
+              { min: 5, max: 12, message: '长度在 5 到 12 个字符', trigger: 'blur' }
             ],
             pwd: [
               { required: true, message: '请输入密码', trigger: 'blur' },
-              { min: 6, max: 18, message: '长度在 6 到 18 个字符', trigger: 'blur' }
+              { min: 5, max: 18, message: '长度在 5 到 18 个字符', trigger: 'blur' }
             ]
           }
         };
@@ -51,9 +51,17 @@
       },
       methods: {
         submitForm(formName) {
-          this.$refs[formName].validate((valid) => {
+          let _self = this;
+          _self.$refs[formName].validate((valid) => {
             if (valid) {
-              alert('submit!');
+              let options= {
+                data: {
+                  username: _self.ruleForm.uname,
+                  password: _self.ruleForm.pwd,
+                },
+                url: '/admin/passport/checkLogin'
+              }
+              _self.$http.Post(options)
             } else {
               console.log('error submit!!');
               return false;
