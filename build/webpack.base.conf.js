@@ -20,11 +20,11 @@ const createLintingRule = () => ({
   }*/
 })
 let entryJs = {}
-// entryJs = glob.sync('./src/pages/**/*.js').reduce(function (prev, curr) {
-//
-//   prev[curr.substring(12, curr.lastIndexOf('/'))] = curr;
-//   return prev;
-// }, {});
+/*entryJs = glob.sync('./src/pages/!**!/!*.js').reduce(function (prev, curr) {
+
+  prev[curr.substring(12, curr.lastIndexOf('/'))] = curr;
+  return prev;
+}, {});*/
 entryJs['app'] = './src/main.js'
 
 module.exports = {
@@ -44,6 +44,12 @@ module.exports = {
       '@': resolve('src'),
     }
   },
+  /*externals: {
+    'vue': 'Vue',
+    'vue-router': 'VueRouter',
+    'element-ui': 'ELEMENT',
+    'axios': 'axios',
+  },*/
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),

@@ -2,8 +2,8 @@
     <el-container>
         <el-header>后台登录</el-header>
         <el-main>
-            <el-row :gutter="20">
-                <el-col :span="12" :offset="6">
+            <el-row>
+                <el-col :span="8" :offset="8">
                     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                         <el-form-item label="用户名" prop="uname">
                             <el-input v-model="ruleForm.uname"></el-input>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-    import Axios from 'axios'
+    import HttpService from '../../common/httpService'
     export default {
       name: 'Index',
       data() {
@@ -46,8 +46,8 @@
         };
       },
       mounted(){
-        this.$axios = Axios;
-        console.log(this.$axios);
+        this.$http = new HttpService(this);
+        console.log(this.$http);
       },
       methods: {
         submitForm(formName) {
