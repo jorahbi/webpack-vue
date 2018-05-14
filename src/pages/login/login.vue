@@ -1,4 +1,5 @@
 <template>
+    <div id="app">
     <el-container>
         <el-header>后台登录</el-header>
         <el-main>
@@ -21,9 +22,13 @@
             </el-row>
         </el-main>
     </el-container>
+    </div>
 </template>
-
+<style>
+    @import "../../style/scss/_login.scss";
+</style>
 <script>
+
     import HttpService from '../../common/httpService'
     export default {
       name: 'Index',

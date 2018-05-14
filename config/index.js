@@ -11,12 +11,9 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/spread': {
+      '*': {
         target: 'http://bxspread.company.com',
         changeOrigin: true,
-        pathRewrite:{
-          '^/spread': ''
-        }
       }
     },
 

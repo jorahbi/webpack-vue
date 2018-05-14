@@ -65,7 +65,7 @@ function sendRequest (axiosOptions) {
     url: axiosOptions.url,
     data: axiosOptions.data,
     method: axiosOptions.method,
-    baseURL: axiosOptions.domain + '/spread',
+    baseURL: '',
     responseType: 'json'
     // headers: axiosOptions.headers
   }).then((res) => {
