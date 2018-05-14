@@ -25,11 +25,11 @@
     </div>
 </template>
 <style>
-    @import "../../style/scss/_login.scss";
+    @import "../../../style/scss/_login.scss";
 </style>
 <script>
 
-    import HttpService from '../../common/httpService'
+    import HttpService from '../../../common/httpService'
     export default {
       name: 'Index',
       data() {

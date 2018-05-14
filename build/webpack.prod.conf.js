@@ -14,7 +14,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const env = require('../config/prod.env')
 
-const htmls = glob.sync('./src/pages/**/*.html').map(function (item) {
+const htmls = glob.sync('./src/pages/**/**/*.html').map(function (item) {
 
   let name = item.substring(12, item.lastIndexOf('/'));
 
