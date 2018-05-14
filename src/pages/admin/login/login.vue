@@ -29,7 +29,7 @@
 </style>
 <script>
 
-    import HttpService from '../../../common/httpService'
+    import api from '../../../common/api'
     export default {
       name: 'Index',
       data() {
@@ -51,8 +51,7 @@
         };
       },
       mounted(){
-        this.$http = new HttpService(this);
-        console.log(this.$http);
+        this.$api = api
       },
       methods: {
         submitForm(formName) {
@@ -66,12 +65,14 @@
                 },
                 url: '/admin/passport/checkLogin'
               }
-              _self.$http.Post(options)
+              this.$api.Post(_self, options)
             } else {
               console.log('error submit!!');
               return false;
             }
           });
+
+
         },
         resetForm(formName) {
           this.$refs[formName].resetFields();

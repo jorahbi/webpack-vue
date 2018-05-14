@@ -1,12 +1,11 @@
 
 import Vue from 'vue'
 import ELEMENT from 'element-ui'
-// import 'element-ui/lib/theme-chalk/index.css'
+import api from './api'
 
-Vue.use(ELEMENT)
 Vue.config.productionTip = false
-Vue.prototype.$http = null
-
+Vue.prototype.$api = api
+Vue.use(ELEMENT)
 let kernel = function (options) {
   options = options || {}
   return new Vue(Object.assign({}, {

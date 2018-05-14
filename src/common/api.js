@@ -4,23 +4,7 @@ import Qs from 'qs'
 // let url = document.location.toString().split('//')
 // const Host = url[0] + '//' + url[1].substr(0, url[1].indexOf('/'))
 const Host = 'http://bxspread.company.com'
-let Axios = null
 let Vue = null
-let HttpService = (_vue, interceptors) => {
-  Vue = _vue
-  Axios = axios
-  interceptors = (typeof interceptors !== 'object') ? {} : interceptors
-  Axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
-  if (typeof interceptors.request !== 'function') {
-    interceptors.request = function (config) { return config }
-  }
-  if (typeof interceptors.response !== 'function') {
-    interceptors.response = function () {}
-  }
-  // 拦截
-  Axios.interceptors.request.use(interceptors.request)
-  Axios.interceptors.response.use(interceptors.response)
-}
 
 function formatOptions (options) {
   options = (typeof options !== 'object') ? {} : options
@@ -32,6 +16,7 @@ function formatOptions (options) {
     loginUrl: Host + '/admin/passport/login',
     data: {},
     headers: {},
+    baseURL: '',
     handle: {
       success: (Vue, res) => {
         let msg = res.data.msg || '操作成功'
@@ -55,25 +40,27 @@ function formatOptions (options) {
     axiosOptions.data[idx] = options.data[idx]
   }
 
-  axiosOptions.data = Qs.stringify(axiosOptions.data)
+  options.data = Qs.stringify(axiosOptions.data)
   return Object.assign({}, axiosOptions, options)
 }
 
 function sendRequest (axiosOptions) {
-  console.log(axiosOptions.data, axiosOptions.method)
-  Axios({
+  axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+  axios({
     url: axiosOptions.url,
     data: axiosOptions.data,
     method: axiosOptions.method,
-    baseURL: '',
-    responseType: 'json'
-    // headers: axiosOptions.headers
-  }).then((res) => {
+    baseURL: axiosOptions.baseURL,
+    responseType: 'json',
+    headers: axiosOptions.headers
+  }).then(function (res) {
     if (res.data.status === 0) {
       axiosOptions.handle.success(Vue, res)
     } else if (res.data.status > 0) {
+      console.log('error')
       axiosOptions.handle.error(Vue, res)
     } else {
+      console.log('other')
       axiosOptions.handle.other(Vue, res)
     }
   }).catch((err) => {
@@ -81,23 +68,40 @@ function sendRequest (axiosOptions) {
   })
 }
 
-HttpService.prototype.Get = (options) => {
-  let axiosOptions = formatOptions(options)
-  axiosOptions.method = 'GET'
-  sendRequest(axiosOptions)
+let Api = {
+
+  Get: (_vue, options) => {
+    Vue = _vue
+    let axiosOptions = formatOptions(options)
+    axiosOptions.method = 'GET'
+    sendRequest(axiosOptions)
+  },
+
+  Post: (_vue, options) => {
+    Vue = _vue
+    let axiosOptions = formatOptions(options)
+    axiosOptions.method = 'POST'
+    sendRequest(axiosOptions)
+  },
+  Ajax: (_vue, options) => {
+    Vue = _vue
+    let axiosOptions = formatOptions(options)
+    axiosOptions.method = 'POST'
+    axiosOptions.headers = {'X-Requested-With': 'XMLHttpRequest'}
+    sendRequest(axiosOptions)
+  },
+  Interceptors: (_vue, interceptors) => {
+    interceptors = (typeof interceptors !== 'object') ? {} : interceptors
+    if (typeof interceptors.request !== 'function') {
+      interceptors.request = function (config) { return config }
+    }
+    if (typeof interceptors.response !== 'function') {
+      interceptors.response = function () {}
+    }
+    // 拦截
+    axios.interceptors.request.use(interceptors.request)
+    axios.interceptors.response.use(interceptors.response)
+  }
 }
 
-HttpService.prototype.Post = (options) => {
-  let axiosOptions = formatOptions(options)
-  axiosOptions.method = 'POST'
-  sendRequest(axiosOptions)
-}
-
-HttpService.prototype.Ajax = (options) => {
-  let axiosOptions = formatOptions(options)
-  axiosOptions.method = 'POST'
-  axiosOptions.headers = {'X-Requested-With': 'XMLHttpRequest'}
-  sendRequest(axiosOptions)
-}
-
-export default HttpService
+export default Api
