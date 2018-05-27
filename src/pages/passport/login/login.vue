@@ -4,10 +4,10 @@
         <el-header>后台登录</el-header>
         <el-main>
             <el-row>
-                <el-col :span="8" :offset="8">
+                <el-col :span="6" :offset="9">
                     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                         <el-form-item label="用户名" prop="uname">
-                            <el-input v-model="ruleForm.uname"></el-input>
+                            <el-input v-model="ruleForm.uname" placeholder="用户名"></el-input>
                         </el-form-item>
                         <el-form-item label="密码" prop="pwd">
                             <el-input v-model="ruleForm.pwd" type="password"></el-input>
@@ -25,13 +25,13 @@
     </div>
 </template>
 <style>
-    @import "../../../style/scss/_login.scss";
+    @import "../../../style/scss/_login.sass";
 </style>
 <script>
 
     import api from '../../../common/api'
     export default {
-      name: 'Index',
+      name: 'PassportLogin',
       data() {
         return {
           ruleForm: {

@@ -80,6 +80,10 @@ module.exports = {
         }
       },
       {
+        test: /\.sacc$/,
+        loader: 'postcss-loader!css-loader'
+      },
+      {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
         options: {

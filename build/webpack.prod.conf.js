@@ -22,7 +22,7 @@ const htmls = glob.sync('./src/pages/**/**/*.html').map(function (item) {
     filename: './' + name + '.html',
     template: item,
     inject: true,
-    chunks:['vendor', 'manifest', name],
+    chunks:['app', 'vendor', 'manifest', name],
     minify: {
       removeComments: true,
       collapseWhitespace: true,

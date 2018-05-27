@@ -29,16 +29,24 @@ function formatOptions (options) {
         Vue.$message.error(res.data.msg)
       },
       exception: (Vue, res) => {
+        console.log(res)
         Vue.$message.error('服务器异常，稍候再试')
       },
       other: (Vue, res) => {
-        Vue.$message.error('服务器异常，稍候再试')
+        Vue.$message.error('服务器异常，稍候再试111')
+        if (options.isLogin) {
+          window.location.href = options.loginUrl
+        }
       }
     }
   }
   for (let idx in options.data) {
     axiosOptions.data[idx] = options.data[idx]
   }
+  for (let idx in options.handle) {
+    axiosOptions.handle[idx] = options.handle[idx]
+  }
+  delete options.handle
 
   options.data = Qs.stringify(axiosOptions.data)
   return Object.assign({}, axiosOptions, options)
@@ -46,26 +54,31 @@ function formatOptions (options) {
 
 function sendRequest (axiosOptions) {
   axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
-  axios({
-    url: axiosOptions.url,
-    data: axiosOptions.data,
-    method: axiosOptions.method,
-    baseURL: axiosOptions.baseURL,
-    responseType: 'json',
-    headers: axiosOptions.headers
-  }).then(function (res) {
-    if (res.data.status === 0) {
-      axiosOptions.handle.success(Vue, res)
-    } else if (res.data.status > 0) {
-      console.log('error')
-      axiosOptions.handle.error(Vue, res)
-    } else {
-      console.log('other')
-      axiosOptions.handle.other(Vue, res)
-    }
-  }).catch((err) => {
-    axiosOptions.handle.exception(Vue, err)
-  })
+  Vue.loading = true
+  setTimeout(function () {
+    axios({
+      url: axiosOptions.url,
+      data: axiosOptions.data,
+      method: axiosOptions.method,
+      baseURL: axiosOptions.baseURL,
+      responseType: 'json',
+      headers: axiosOptions.headers
+    }).then(function (res) {
+      if (res.data.status === 0) {
+        axiosOptions.handle.success(Vue, res)
+        Vue.loading = false
+      } else if (res.data.status > 0) {
+        axiosOptions.handle.error(Vue, res)
+        Vue.loading = false
+      } else {
+        axiosOptions.handle.other(Vue, res)
+        Vue.loading = false
+      }
+    }).catch((err) => {
+      axiosOptions.handle.exception(Vue, err)
+      Vue.loading = false
+    })
+  }, 500)
 }
 
 let Api = {
@@ -76,14 +89,7 @@ let Api = {
     axiosOptions.method = 'GET'
     sendRequest(axiosOptions)
   },
-
   Post: (_vue, options) => {
-    Vue = _vue
-    let axiosOptions = formatOptions(options)
-    axiosOptions.method = 'POST'
-    sendRequest(axiosOptions)
-  },
-  Ajax: (_vue, options) => {
     Vue = _vue
     let axiosOptions = formatOptions(options)
     axiosOptions.method = 'POST'

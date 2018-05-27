@@ -1,33 +1,33 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Index from '../pages/admin/index/index.vue'
-import Content from '../pages/index/content/content.vue'
-import Detail from '../pages/index/detail/detail.vue'
-import Login from '../pages/admin/login/login.vue'
+import PassportLogin from '../pages/passport/login/login.vue'
+import IndexList from '../pages/index/list/list.vue'
+import DemoList from '../pages/demo/list/list.vue'
+import GetDirectAgent from '../pages/index/getDirectAgent/getDirectAgent.vue'
 
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
-      path: '/',
-      name: 'index',
-      component: Index
+      path: '/admin/passport/login',
+      name: 'PassportLogin',
+      component: PassportLogin
     },
     {
-      path: '/content',
-      name: 'Content',
-      component: Content
+      path: '/admin/index/list',
+      name: 'IndexList',
+      component: IndexList
     },
     {
-      path: '/detail',
-      name: 'Detail',
-      component: Detail
+      path: '/demo/list',
+      name: 'DemoList',
+      component: DemoList
     },
     {
-      path: '/login',
-      name: 'Login',
-      component: Login
+      path: '/admin/index/getDirectAgent/:id',
+      name: 'GetDirectAgent',
+      component: GetDirectAgent
     }
   ]
 })
