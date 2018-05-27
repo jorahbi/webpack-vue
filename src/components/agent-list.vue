@@ -1,10 +1,8 @@
 <template>
     <div>
-
         <el-row>
             <el-col :span="24">
                 <el-table :data="tableData"  v-loading="loading" border="" :stripe="true" @expand-change="expand" ref="table">
-
                     <el-table-column type="expand">
                         <template slot-scope="props">
                             <el-row>
@@ -22,15 +20,9 @@
                             <el-row>
                                 <el-col :span="6">
                                      直属代理总数:
-                                    <el-button @click="inputChange(props.row.name, props.row.id)" size="small" type="text">
-                                        {{ expandInfo[props.row.name].child_count }}
-                                    </el-button>
-                                    <router-link :to="{path:'/admin/index/getDirectAgent', params: { agentName: props.row.name, agentId: props.row.id}}">
+                                    <router-link :to="{path:'/admin/index/getDirectAgent/' + props.row.id}" size="small">
                                         {{ expandInfo[props.row.name].child_count }}
                                     </router-link>
-
-
-
                                 </el-col>
                                 <el-col :span="6">
                                     <span> 直属玩家总数: {{ expandInfo[props.row.name].player_count }}</span>

@@ -1,11 +1,7 @@
 <template>
-
     <el-container class="container">
-
         <el-aside width="auto">
-
             <Menus :menuActive="menuActive"></Menus>
-
         </el-aside>
         <el-container>
             <el-header>
