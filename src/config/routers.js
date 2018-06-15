@@ -25,7 +25,7 @@ export default new Router({
       component: DemoList
     },
     {
-      path: '/admin/index/getDirectAgent/:id',
+      path: '/admin/index/getDirectAgent/:id/:name',
       name: 'GetDirectAgent',
       component: GetDirectAgent
     }

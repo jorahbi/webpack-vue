@@ -24,10 +24,11 @@ requireComponent.keys().forEach(fileName => {
   Vue.component(componentName, componentConfig.default || componentConfig)
 })
 // let init = true
-// router.beforeEach((to, from, next) => {
-//   console.log(to)
-//   next()
-// })
+
+/* router.beforeEach((to, from, next) => {
+  console.log(to)
+  next()
+}) */
 new Vue({
   el: '#app',
   router,

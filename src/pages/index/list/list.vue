@@ -6,9 +6,20 @@
         <el-container>
             <el-header>
                 <Header></Header>
+
             </el-header>
             <el-container>
                 <el-main>
+                    <el-row class="breadcrumb">
+                        <el-col>
+                    <el-breadcrumb separator-class="el-icon-arrow-right">
+                        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                        <el-breadcrumb-item>活动管理</el-breadcrumb-item>
+                        <el-breadcrumb-item>活动列表</el-breadcrumb-item>
+                        <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+                    </el-breadcrumb>
+                        </el-col>
+                    </el-row>
                     <el-row :gutter="20">
                         <el-col :span="12">
                             <el-form class="demo-ruleForm" label-width="100px">
@@ -39,7 +50,6 @@
         menuActive: '1-1',
         name: '',
         keyupTime: 0,
-
       }
     },
     methods: {

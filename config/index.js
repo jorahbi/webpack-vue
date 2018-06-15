@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '*': {
-        target: 'http://bxspread.company.com',
+        target: 'http://bxspread-admin.company.com',
         changeOrigin: true,
       }
     },

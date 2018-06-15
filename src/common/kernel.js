@@ -9,6 +9,7 @@ Vue.prototype.$api = api
 let router = new Router()
 
 Vue.use(ELEMENT)
+
 let kernel = function (options) {
   options = options || {}
   return new Vue(Object.assign({}, {

@@ -20,7 +20,10 @@
                             <el-row>
                                 <el-col :span="6">
                                      直属代理总数:
-                                    <router-link :to="{path:'/admin/index/getDirectAgent/' + props.row.id}" size="small">
+                                    <!--<el-button @click="inputChange(props.row.name, props.row.id)" size="small" type="text">
+                                        {{ expandInfo[props.row.name].child_count }}
+                                    </el-button>-->
+                                    <router-link :to="{path:'/admin/index/getDirectAgent/' + props.row.id + '/' + props.row.name}">
                                         {{ expandInfo[props.row.name].child_count }}
                                     </router-link>
                                 </el-col>
@@ -36,11 +39,10 @@
                             </el-row>
                             <el-row>
                                 <el-col :span="6">
-
-                                    <span> 团队税收: {{ expandInfo[props.row.name].child_count }}</span>
+                                    <span> 团队税收: {{ expandInfo[props.row.name].groupTaxIncome }}</span>
                                 </el-col>
                                 <el-col :span="6">
-                                    <span>剩余额度: {{ expandInfo[props.row.name].groupTaxIncome }}</span>
+                                    <span>剩余额度: {{ expandInfo[props.row.name].balance }}</span>
                                 </el-col>
                                 <el-col :span="6">
                                     <span>-已提现: {{ expandInfo[props.row.name].amount }}</span>
@@ -327,15 +329,15 @@
           url: '/admin/index/list',
           handle: {
             success: (Vue, res) => {
-              let msg = res.data.msg || '操作成功'
+              let msg = res.data.msg || '操作成功';
               Vue.$message({
                 type: 'success',
                 message: msg
-              })
+              });
               Vue.tableData = res.data.data
             }
           }
-        }
+        };
         this.$api.Post(this, options)
       },
       handleClick(row) {
