@@ -2,7 +2,8 @@
     <div>
         <el-row>
             <el-col :span="24">
-                <el-table :data="tableData"  v-loading="loading" border="" :stripe="true" @expand-change="expand" ref="table">
+                <el-table :data="tableData" v-loading="loading" border="" :stripe="true" @expand-change="expand"
+                          ref="table">
                     <el-table-column type="expand">
                         <template slot-scope="props">
                             <el-row>
@@ -19,16 +20,21 @@
                             </el-row>
                             <el-row>
                                 <el-col :span="6">
-                                     直属代理总数:
-                                    <!--<el-button @click="inputChange(props.row.name, props.row.id)" size="small" type="text">
-                                        {{ expandInfo[props.row.name].child_count }}
-                                    </el-button>-->
-                                    <router-link :to="{path:'/admin/index/getDirectAgent/' + props.row.id + '/' + props.row.name}">
+                                    直属代理总数:
+                                    <router-link :to="{ name: 'GetDirectAgent', params: { id: props.row.id, name: props.row.name}}"
+                                            v-if="expandInfo[props.row.name].child_count > 0">
                                         {{ expandInfo[props.row.name].child_count }}
                                     </router-link>
+                                    <span v-else>0</span>
                                 </el-col>
                                 <el-col :span="6">
-                                    <span> 直属玩家总数: {{ expandInfo[props.row.name].player_count }}</span>
+                                    直属玩家总数:
+                                    <router-link
+                                            :to="{path:'/admin/index/getPlayerList/' + props.row.id + '/' + props.row.name}"
+                                            v-if="expandInfo[props.row.name].player_count > 0">
+                                        {{ expandInfo[props.row.name].player_count }}
+                                    </router-link>
+                                    <span v-else>0</span>
                                 </el-col>
                                 <el-col :span="6">
                                     <span> 流水: {{ expandInfo[props.row.name].flow }}</span>
@@ -104,24 +110,27 @@
         </el-row>
 
         <!-- 修改金额 -->
-        <el-dialog title="增加额度" :visible.sync="AmountDialogFormVisible">
-            <el-form :model="amountForm" ref="amountForm" :rules="amountRules">
-                <el-input v-model="amountForm.agentId" type="hidden" value="amountForm.agentId"></el-input>
-                <el-input v-model="amountForm.agentName" type="hidden"
-                          value="amountForm.agentName"></el-input>
-                <el-form-item label="额度">
-                    <el-input v-model="amountForm.amount" auto-complete="off"
-                    ></el-input>
-                </el-form-item>
-                <el-form-item label="简介">
-                    <el-input v-model="amountForm.msg" auto-complete="off"
-                    ></el-input>
-                </el-form-item>
-            </el-form>
+        <el-dialog :title="amountForm.agentName + '增加额度'" :visible.sync="AmountDialogFormVisible" width="40%">
+            <el-row>
+                <el-col :span="20">
+                    <el-form :model="amountForm" ref="amountForm" :rules="amountRules" label-width="80px">
+                        <el-input v-model="amountForm.agentId" type="hidden" value="amountForm.agentId"></el-input>
+                        <el-input v-model="amountForm.agentName" type="hidden"
+                                  value="amountForm.agentName"></el-input>
+                        <el-form-item label="额度" prop="amount">
+                            <el-input v-model="amountForm.amount"></el-input>
+                        </el-form-item>
+                        <el-form-item label="简介" prop="msg">
+                            <el-input v-model="amountForm.msg"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+            </el-row>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="AmountDialogFormVisible = false">取 消</el-button>
                 <el-button type="primary" @click="addAmountJust('amountForm')">确 定</el-button>
+                <el-button @click="AmountDialogFormVisible = false">取 消</el-button>
             </div>
+
         </el-dialog>
 
         <!-- end 修改金额 -->
@@ -190,378 +199,383 @@
 </style>
 <script>
 
-  import api from '../common/api'
+    import api from '../common/api'
 
-  const EDIT = -1; //修改档位
-  const INFINITE = 1; //设为无限
-  const NOT_INFINITE = 0; //取消无限
-  export default {
-    data() {
-      return {
-        loading: false,
-        tableData: [],
+    const EDIT = -1; //修改档位
+    const INFINITE = 1; //设为无限
+    const NOT_INFINITE = 0; //取消无限
+    export default {
+        data() {
+            return {
+                loading: false,
+                tableData: [],
 
-        isLock: true,
-        dialogFormVisible: false,
-        addLevelVisible: false,
-        AmountDialogFormVisible: false,
-        level: {
-          first: '',
-          last: '',
-          level: 1,
-          agent: '',
-        },
-        levelTitle: '',
-        addLevelTitle: '',
-        promotersLevels: [],
-        levels: [
-          {first: "1", last: "15"},
-          {first: "16", last: "25"},
-          {first: "26", last: "35"},
-          {first: "36", last: "45"},
-          {first: "46", last: "50"},
-          {first: "51", last: "51"},
-        ],
-        lastLevel: '',
-        expandInfo: {},
-        amountForm: {
-          amount: '',
-          msg: '',
-          agentId: 0,
-          agentName: '',
-        },
-        amountRules: {
-          amount: [
-            {required: true, message: '金额不能为空', trigger: 'blur'},
-          ]
-        }
-      }
-    },
-    mounted() {
-      this.$api = api
-    },
-    methods: {
-      expand(row) {
-        if (this.expandInfo[row.name] || !row.name) {
-          return false;
-        }
-        this.expandInfo[row.name] = {
-          fathers: []
-        };
-        let options = {
-          data: {
-            agentName: row.name,
-            agentId: row.id
-          },
-          url: '/admin/index/getAgentDetail',
-          handle: {
-            success: (Vue, res) => {
-              let msg = res.data.msg || '操作成功';
-              Vue.$message({
-                type: 'success',
-                message: msg
-              });
-              Vue.expandInfo[row.name] = res.data.data;
-              Vue.$refs.table.toggleRowExpansion(res.data.data, true)
-
-            }
-          }
-        };
-        this.$api.Post(this, options)
-      },
-      amountDialog(row) {
-        let _self = this;
-        _self.AmountDialogFormVisible = true;
-        _self.amountForm.agentId = row.id;
-        _self.amountForm.agentName = row.name;
-      },
-      addAmountJust(formName) {
-
-        let _self = this;
-        _self.$refs[formName].validate((valid) => {
-          if (valid) {
-            let options = {
-              data: {
-                agentId: _self.amountForm.agentId,
-                agentName: _self.amountForm.agentName,
-                amount: _self.amountForm.amount,
-                log: _self.amountForm.msg,
-              },
-              handle: {
-                success: (Vue, res) => {
-                  let msg = res.data.msg || '操作成功';
-                  Vue.$message({
-                    type: 'success',
-                    message: msg
-                  });
-                  Object.assign(_self.expandInfo[_self.amountForm.agentName], res.data.data);
-                  //_self.tableData[0] = Object.assign({}, _self.tableData[0], res.data.data);
-                  _self.amountForm.amount = '';
-                  _self.amountForm.msg = '';
-                  _self.AmountDialogFormVisible = false
+                isLock: true,
+                dialogFormVisible: false,
+                addLevelVisible: false,
+                AmountDialogFormVisible: false,
+                level: {
+                    first: '',
+                    last: '',
+                    level: 1,
+                    agent: '',
+                },
+                levelTitle: '',
+                addLevelTitle: '',
+                promotersLevels: [],
+                levels: [
+                    {first: "1", last: "15"},
+                    {first: "16", last: "25"},
+                    {first: "26", last: "35"},
+                    {first: "36", last: "45"},
+                    {first: "46", last: "50"},
+                    {first: "51", last: "51"},
+                ],
+                lastLevel: '',
+                expandInfo: {},
+                amountForm: {
+                    amount: '',
+                    msg: '',
+                    agentId: 0,
+                    agentName: '',
+                },
+                amountRules: {
+                    amount: [
+                        {required: true, message: '金额不能为空', trigger: 'blur'},
+                    ]
                 }
-              },
-              url: '/admin/amount_money/addAmountJust'
-            };
-            this.$api.Post(_self, options)
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
-
-      selLevelChange(event) {
-        let _self = this;
-        for (let level in _self.levels) {
-          if (_self.levels[level].first === event) {
-            _self.level.last = _self.levels[level].last;
-            break;
-          }
-        }
-      },
-      inputChange(uname, id) {
-        let options = {
-          data: {
-            agentName: uname,
-            agentId: id
-          },
-          url: '/admin/index/list',
-          handle: {
-            success: (Vue, res) => {
-              let msg = res.data.msg || '操作成功';
-              Vue.$message({
-                type: 'success',
-                message: msg
-              });
-              Vue.tableData = res.data.data
             }
-          }
-        };
-        this.$api.Post(this, options)
-      },
-      handleClick(row) {
-        let options = {
-          url: '/admin/index/unlock'
-        };
-        let params = {agentName: row.name};
-        this.$api.Post(this, options, params);
-      },
-      readLevel(row) {
-        let _self = this;
-        _self.levelTitle = '查看代理: ' + row.name + ' 的档位';
-        _self.level.agent = row.name;
-        _self.dialogFormVisible = true;
-
-        let options = {
-          data: {
-            agentName: row.name,
-          },
-          url: '/admin/index/getLevels',
-          handle: {
-            success: (Vue, res) => {
-              _self.promotersLevels = res.data.data;
-            }
-          }
-        };
-        this.$api.Post(this, options)
-      },
-      //修改档位
-      modifyLevel(row) {
-        let _self = this;
-        _self.$prompt('修改档位', '修改用户' + _self.level.agent + '档位', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        }).then(({value}) => {
-          _self.submitModifyLevel(row, value, EDIT);
-        }).catch(() => {
-          _self.$message({
-            type: 'info',
-            message: '取消修改'
-          });
-        });
-      },
-      modifyLevelInfinite(row) {
-        let _self = this;
-        let isInfinite = INFINITE;
-        let dialog = '是否设为无限';
-        if (row.num === '-1') {
-          isInfinite = NOT_INFINITE;
-          dialog = '是否取消无限';
-        }
-
-        _self.$confirm(dialog, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          _self.submitModifyLevel(row, -1, isInfinite);
-        }).catch(() => {
-          _self.$message({
-            type: 'info',
-            message: '已取消'
-          });
-        });
-
-      },
-      addLevel() {
-        let _self = this;
-        _self.addLevelVisible = true;
-        _self.addLevelTitle = '添加' + _self.level.agent + '档位';
-      },
-      addSubmitLivel() {
-        let _self = this;
-        let row = {
-          user: _self.level.agent,
-          first_num: _self.level.first,
-          last_num: _self.level.last,
-          id: 0
-        };
-        _self.submitModifyLevel(row, _self.level.level, EDIT);
-        _self.addLevelVisible = false;
-      },
-      submitModifyLevel(row, value, infinite) {
-        let options = {
-          data: {
-            agentName: row.user,
-            first: row.first_num,
-            last: row.last_num,
-            level: value,
-            infinite: infinite,
-            id: row.id
-          },
-          url: '/admin/index/modifyLevel',
-          handle: {
-            success: (Vue, res) => {
-              Vue.$message({
-                type: 'success',
-                message: '修改成功'
-              });
-              Vue.readLevel({name: row.user});
-            }
-          }
-        };
-        this.$api.Post(this, options);
-      },
-      delLevel(row) {
-        let _self = this;
-        _self.$confirm('确定删除', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          let options = {
-            url: '/admin/index/delLevel',
-            data: {
-              levelId: row.id
+        },
+        mounted() {
+            this.$api = api
+        },
+        watch: {
+            '$route': function (route) {
+                console.log(route, 'list')
             },
-            handle: {
-              success: (Vue, res) => {
-                Vue.$message({
-                  type: 'success',
-                  message: '删除成功'
-                });
-                _self.readLevel({name: row.user});
-
-              }
-            }
-          };
-          _self.$api.Post(_self, options);
-
-        }).catch(() => {
-          _self.$message({
-            type: 'info',
-            message: '已取消'
-          });
-        });
-
-      },
-      proportion(row) {
-
-        let _self = this;
-        let options = {
-          data: {
-            agentName: row.name
-          },
-          url: '/admin/index/getProportion',
-          handle: {
-            success: (Vue, res) => {
-
-              Vue.$prompt('原比例:' + res.data.data.proportion, '修改用户' + row.name + '分成比例', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-              }).then(({value}) => {
-                value = parseInt(value);
-                if (isNaN(value) || value < 0 || value > 100) {
-                  Vue.$message.error('请输入大于等于0并且小于等于100的整数数字');
-                  return false;
+        },
+        methods: {
+            expand(row) {
+                if (this.expandInfo[row.name] || !row.name) {
+                    return false;
                 }
-                let options = {
-                  url: '/admin/index/editProportion',
-                  data: {
-                    agentName: row.name,
-                    proportion: value
-                  }
+                this.expandInfo[row.name] = {
+                    fathers: []
                 };
-                _self.$api.Post(_self, options);
+                let options = {
+                    data: {
+                        agentName: row.name,
+                        agentId: row.id
+                    },
+                    url: '/admin/index/getAgentDetail',
+                    handle: {
+                        success: (Vue, res) => {
+                            let msg = res.data.msg || '操作成功';
+                            Vue.$message({
+                                type: 'success',
+                                message: msg
+                            });
+                            Vue.expandInfo[row.name] = res.data.data;
+                            Vue.$refs.table.toggleRowExpansion(res.data.data, true)
 
-              }).catch((err) => {
-                console.log(err)
-                _self.$message({
-                  type: 'info',
-                  message: '取消修改'
+                        }
+                    }
+                };
+                this.$api.Post(this, options)
+            },
+            amountDialog(row) {
+                let _self = this;
+                _self.AmountDialogFormVisible = true;
+                _self.amountForm.agentId = row.id;
+                _self.amountForm.agentName = row.name;
+            },
+            addAmountJust(formName) {
+
+                let _self = this;
+                _self.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        let options = {
+                            data: {
+                                agentId: _self.amountForm.agentId,
+                                agentName: _self.amountForm.agentName,
+                                amount: _self.amountForm.amount,
+                                log: _self.amountForm.msg,
+                            },
+                            handle: {
+                                success: (Vue, res) => {
+                                    let msg = res.data.msg || '操作成功';
+                                    Vue.$message({
+                                        type: 'success',
+                                        message: msg
+                                    });
+                                    Object.assign(_self.expandInfo[_self.amountForm.agentName], res.data.data);
+                                    //_self.tableData[0] = Object.assign({}, _self.tableData[0], res.data.data);
+                                    _self.amountForm.amount = '';
+                                    _self.amountForm.msg = '';
+                                    _self.AmountDialogFormVisible = false
+                                }
+                            },
+                            url: '/admin/amount_money/addAmountJust'
+                        };
+                        this.$api.Post(_self, options)
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
                 });
-              });
+            },
+
+            selLevelChange(event) {
+                let _self = this;
+                for (let level in _self.levels) {
+                    if (_self.levels[level].first === event) {
+                        _self.level.last = _self.levels[level].last;
+                        break;
+                    }
+                }
+            },
+            inputChange(uname, id) {
+                let options = {
+                    data: {
+                        agentName: uname,
+                        agentId: id
+                    },
+                    url: '/admin/index/list',
+                    handle: {
+                        success: (Vue, res) => {
+                            let msg = res.data.msg || '操作成功';
+                            Vue.$message({
+                                type: 'success',
+                                message: msg
+                            });
+                            Vue.tableData = res.data.data
+                        }
+                    }
+                };
+                this.$api.Post(this, options)
+            },
+            handleClick(row) {
+                let options = {
+                    url: '/admin/index/unlock'
+                };
+                let params = {agentName: row.name};
+                this.$api.Post(this, options, params);
+            },
+            readLevel(row) {
+                let _self = this;
+                _self.levelTitle = '查看代理: ' + row.name + ' 的档位';
+                _self.level.agent = row.name;
+                _self.dialogFormVisible = true;
+
+                let options = {
+                    data: {
+                        agentName: row.name,
+                    },
+                    url: '/admin/index/getLevels',
+                    handle: {
+                        success: (Vue, res) => {
+                            _self.promotersLevels = res.data.data;
+                        }
+                    }
+                };
+                this.$api.Post(this, options)
+            },
+            //修改档位
+            modifyLevel(row) {
+                let _self = this;
+                _self.$prompt('修改档位', '修改用户' + _self.level.agent + '档位', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({value}) => {
+                    _self.submitModifyLevel(row, value, EDIT);
+                }).catch(() => {
+                    _self.$message({
+                        type: 'info',
+                        message: '取消修改'
+                    });
+                });
+            },
+            modifyLevelInfinite(row) {
+                let _self = this;
+                let isInfinite = INFINITE;
+                let dialog = '是否设为无限';
+                if (row.num === '-1') {
+                    isInfinite = NOT_INFINITE;
+                    dialog = '是否取消无限';
+                }
+
+                _self.$confirm(dialog, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    _self.submitModifyLevel(row, -1, isInfinite);
+                }).catch(() => {
+                    _self.$message({
+                        type: 'info',
+                        message: '已取消'
+                    });
+                });
+
+            },
+            addLevel() {
+                let _self = this;
+                _self.addLevelVisible = true;
+                _self.addLevelTitle = '添加' + _self.level.agent + '档位';
+            },
+            addSubmitLivel() {
+                let _self = this;
+                let row = {
+                    user: _self.level.agent,
+                    first_num: _self.level.first,
+                    last_num: _self.level.last,
+                    id: 0
+                };
+                _self.submitModifyLevel(row, _self.level.level, EDIT);
+                _self.addLevelVisible = false;
+            },
+            submitModifyLevel(row, value, infinite) {
+                let options = {
+                    data: {
+                        agentName: row.user,
+                        first: row.first_num,
+                        last: row.last_num,
+                        level: value,
+                        infinite: infinite,
+                        id: row.id
+                    },
+                    url: '/admin/index/modifyLevel',
+                    handle: {
+                        success: (Vue, res) => {
+                            Vue.$message({
+                                type: 'success',
+                                message: '修改成功'
+                            });
+                            Vue.readLevel({name: row.user});
+                        }
+                    }
+                };
+                this.$api.Post(this, options);
+            },
+            delLevel(row) {
+                let _self = this;
+                _self.$confirm('确定删除', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let options = {
+                        url: '/admin/index/delLevel',
+                        data: {
+                            levelId: row.id
+                        },
+                        handle: {
+                            success: (Vue, res) => {
+                                Vue.$message({
+                                    type: 'success',
+                                    message: '删除成功'
+                                });
+                                _self.readLevel({name: row.user});
+
+                            }
+                        }
+                    };
+                    _self.$api.Post(_self, options);
+
+                }).catch(() => {
+                    _self.$message({
+                        type: 'info',
+                        message: '已取消'
+                    });
+                });
+
+            },
+            proportion(row) {
+
+                let _self = this;
+                let options = {
+                    data: {
+                        agentName: row.name
+                    },
+                    url: '/admin/index/getProportion',
+                    handle: {
+                        success: (Vue, res) => {
+
+                            Vue.$prompt('原比例:' + res.data.data.proportion, '修改用户' + row.name + '分成比例', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                            }).then(({value}) => {
+                                value = parseInt(value);
+                                if (isNaN(value) || value < 0 || value > 100) {
+                                    Vue.$message.error('请输入大于等于0并且小于等于100的整数数字');
+                                    return false;
+                                }
+                                let options = {
+                                    url: '/admin/index/editProportion',
+                                    data: {
+                                        agentName: row.name,
+                                        proportion: value
+                                    }
+                                };
+                                _self.$api.Post(_self, options);
+
+                            }).catch((err) => {
+                                console.log(err)
+                                _self.$message({
+                                    type: 'info',
+                                    message: '取消修改'
+                                });
+                            });
+                        }
+
+                    }
+                };
+                this.$api.Post(this, options)
+            },
+            modifyPwd(row) {
+                let _self = this;
+                this.$prompt('请输入密码', '修改用户' + row.name + '密码', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({value}) => {
+
+                    let options = {
+                        data: {
+                            agentId: row.id,
+                            pwd: value
+                        },
+                        url: '/admin/index/modifyPwd'
+                    };
+                    _self.$api.Post(_self, options);
+                }).catch(() => {
+                    _self.$message({
+                        type: 'info',
+                        message: '取消修改'
+                    });
+                });
+            },
+            modifyBillPwd(row) {
+                let _self = this;
+                this.$prompt('请输入提现密码', '修改用户' + row.name + '提现密码', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({value}) => {
+                    let options = {
+                        data: {
+                            agentId: row.id,
+                            billPwd: value
+                        },
+                        url: '/admin/index/modifyBillPwd'
+                    };
+                    _self.$api.Post(_self, options);
+
+                }).catch(() => {
+                    _self.$message({
+                        type: 'info',
+                        message: '取消修改'
+                    });
+                });
             }
-
-          }
-        };
-        this.$api.Post(this, options)
-      },
-      modifyPwd(row) {
-        let _self = this;
-        this.$prompt('请输入密码', '修改用户' + row.name + '密码', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        }).then(({value}) => {
-
-          let options = {
-            data: {
-              agentId: row.id,
-              pwd: value
-            },
-            url: '/admin/index/modifyPwd'
-          };
-          _self.$api.Post(_self, options);
-        }).catch(() => {
-          _self.$message({
-            type: 'info',
-            message: '取消修改'
-          });
-        });
-      },
-      modifyBillPwd(row) {
-        let _self = this;
-        this.$prompt('请输入提现密码', '修改用户' + row.name + '提现密码', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        }).then(({value}) => {
-          let options = {
-            data: {
-              agentId: row.id,
-              billPwd: value
-            },
-            url: '/admin/index/modifyBillPwd'
-          };
-          _self.$api.Post(_self, options);
-
-        }).catch(() => {
-          _self.$message({
-            type: 'info',
-            message: '取消修改'
-          });
-        });
-      }
+        }
     }
-  }
 </script>

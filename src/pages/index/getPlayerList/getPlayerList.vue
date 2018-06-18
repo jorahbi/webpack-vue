@@ -1,8 +1,7 @@
 <template>
     <el-container class="container">
         <el-header>
-            <header>
-            </header>
+            <Header></Header>
         </el-header>
         <el-container>
             <menus :menuActive="menuActive">
@@ -14,50 +13,30 @@
                             <el-breadcrumb  separator-class="el-icon-arrow-right">
                                 <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
                                 <el-breadcrumb-item :to="{ path: '/admin/index/list' }">代理列表</el-breadcrumb-item>
-                                <el-breadcrumb-item  separator="/"  v-for="(breadcrumb, index) in breadcrumbs" :key="index"
-                                                    v-if="index < breadcrumbs.length - 1">
-                                    <router-link :to="{path: breadcrumb.path}">
-                                        {{ breadcrumb.agentName }} 直属代理列表
-                                    </router-link>
-                                </el-breadcrumb-item>
-                                <el-breadcrumb-item>{{ agentName }} 直属代理列表</el-breadcrumb-item>
+                                <el-breadcrumb-item>{{ agentName }} 直属玩家列表</el-breadcrumb-item>
                             </el-breadcrumb>
                         </el-col>
                     </el-row>
                     <el-row>
                         <el-col :span="24">
                             <el-table :data="tableData" border="" style="width: 85%" v-loading="loading">
-                                <el-table-column label="ID" prop="agent_id" style="width:5%">
+                                <el-table-column label="昵称" prop="nick_name" style="width:5%">
                                 </el-table-column>
-                                <el-table-column label="帐号" prop="agent_name" style="width:5%">
+                                <el-table-column label="balance" prop="balance" style="width:10%">
                                 </el-table-column>
-                                <el-table-column label="直属代理总数" prop="child_count" style="width:10%">
-                                    <template slot-scope="scope">
-                                        <el-button size="small" @click="readChild(scope.row.agent_id, scope.row.agent_name, 1)" v-if="scope.row.child_count > 0">
-                                            {{ scope.row.child_count }}
-                                        </el-button>
-                                        <el-button size="small" disabled v-else>
-                                            {{ scope.row.child_count }}
-                                        </el-button>
-                                    </template>
+                                <el-table-column label="cash_flow" prop="cash_flow" style="width:10%">
                                 </el-table-column>
-
-                                <el-table-column label="直属玩家总数" prop="player_count" style="width:10%">
-                                    <template slot-scope="scope">
-                                        <el-button size="small" @click="readChild(scope.row.agent_id, scope.row.agent_name, 1)" v-if="scope.row.player_count > 0">
-                                            {{ scope.row.player_count }}
-                                        </el-button>
-                                        <el-button size="small" disabled v-else>
-                                            {{ scope.row.player_count }}
-                                        </el-button>
-                                    </template>
+                                <el-table-column label="order_amount" prop="order_amount" style="width:10%">
                                 </el-table-column>
-
-                                <el-table-column label="流水" prop="flow" style="width:10%">
+                                <el-table-column label="profit_loss" prop="profit_loss" style="width:10%">
                                 </el-table-column>
-                                <el-table-column label="税收" prop="taxIncome" style="width:10%">
+                                <el-table-column label="withdraw_amount" prop="withdraw_amount" style="width:10%">
                                 </el-table-column>
                                 <el-table-column label="创建时间" prop="create_time" style="width:10%">
+                                </el-table-column>
+                                <el-table-column label="register_date" prop="register_date" style="width:10%">
+                                </el-table-column>
+                                <el-table-column label="是否有效" prop="is_active" style="width:10%">
                                 </el-table-column>
                             </el-table>
                         </el-col>
@@ -109,25 +88,17 @@
       this.$api = api;
       this.init();
     },
-      // watch: {
-      //     '$route': function (route) {
-      //         console.log(route, 'get_direct_agent')
-      //     },
-      // },
     methods: {
       init(){
-        let params = JSON.parse(localStorage.getItem('GetDirectAgent'));
-        this.agentName = params.name;
-        this.agentId = params.id;
+        this.agentName = this.$route.params.name;
+        this.agentId = this.$route.params.id;
         this.breadcrumbs[this.breadcrumbs.length] = {
           agentId: this.agentId,
           agentName: this.agentName
         };
-
         this.getDirectAgent();
       },
       getDirectAgent(){
-
         let _self = this;
         let options = {
           data: {
@@ -136,7 +107,7 @@
             pageSize: this.pageSize,
             currentPage: this.currentPage
           },
-          url: '/admin/index/getDirectAgent',
+          url: '/admin/index/getPlayerList',
           handle: {
             success: (Vue, res) => {
               let msg = res.data.msg || '操作成功';

@@ -4,10 +4,13 @@ import PassportLogin from '../pages/passport/login/login.vue'
 import IndexList from '../pages/index/list/list.vue'
 import DemoList from '../pages/demo/list/list.vue'
 import GetDirectAgent from '../pages/index/getDirectAgent/getDirectAgent.vue'
+import GetPlayerList from '../pages/index/getPlayerList/getPlayerList.vue'
+import ResourceList from '../pages/acl/resourceList/resourceList.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
+  // mode: 'history',
   routes: [
     {
       path: '/admin/passport/login',
@@ -28,6 +31,29 @@ export default new Router({
       path: '/admin/index/getDirectAgent/:id/:name',
       name: 'GetDirectAgent',
       component: GetDirectAgent
+    },
+    {
+      path: '/admin/index/getPlayerList/:id/:name',
+      name: 'GetPlayList',
+      component: GetPlayerList
+    },
+    {
+      path: '/admin/acl/resourceList',
+      name: 'ResourceList',
+      component: ResourceList
     }
   ]
 })
+
+let init = true
+
+router.beforeEach((to, from, next) => {
+  localStorage.setItem('GetDirectAgent', JSON.stringify(to.params))
+  if (!init) {
+    // window.location.href = to.path
+  }
+  init = false
+  next()
+})
+
+export default router

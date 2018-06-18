@@ -1,13 +1,11 @@
 <template>
     <el-container class="container">
-        <el-aside width="auto">
-            <Menus :menuActive="menuActive"></Menus>
-        </el-aside>
-        <el-container>
-            <el-header>
-                <Header></Header>
+        <el-header>
+            <Header></Header>
+        </el-header>
 
-            </el-header>
+        <el-container>
+            <Menus :menuActive="menuActive"></Menus>
             <el-container>
                 <el-main>
                     <el-row class="breadcrumb">

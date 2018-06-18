@@ -23,12 +23,7 @@ requireComponent.keys().forEach(fileName => {
   // 以全局方式注册组件
   Vue.component(componentName, componentConfig.default || componentConfig)
 })
-// let init = true
 
-/* router.beforeEach((to, from, next) => {
-  console.log(to)
-  next()
-}) */
 new Vue({
   el: '#app',
   router,
