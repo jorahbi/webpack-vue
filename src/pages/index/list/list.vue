@@ -42,7 +42,11 @@
     </el-container>
 </template>
 <script>
+    import AgentList from '../../../components/agent-list.vue'
   export default {
+    components: {
+        'AgentList': AgentList
+    },
     data() {
       return {
         menuActive: '1-1',

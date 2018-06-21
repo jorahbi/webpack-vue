@@ -90,6 +90,7 @@
 </style>
 <script>
   import api from '../../../common/api';
+  import Storage from '../../../common/storage';
   export default {
     data() {
       return {
@@ -116,7 +117,7 @@
       // },
     methods: {
       init(){
-        let params = JSON.parse(localStorage.getItem('GetDirectAgent'));
+        let params = Storage.get('GetDirectAgent');// JSON.parse(localStorage.getItem('GetDirectAgent'));
         this.agentName = params.name;
         this.agentId = params.id;
         this.breadcrumbs[this.breadcrumbs.length] = {

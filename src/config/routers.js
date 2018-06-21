@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Storage from '../common/storage'
 import PassportLogin from '../pages/passport/login/login.vue'
 import IndexList from '../pages/index/list/list.vue'
 import DemoList from '../pages/demo/list/list.vue'
@@ -10,7 +11,7 @@ import ResourceList from '../pages/acl/resourceList/resourceList.vue'
 Vue.use(Router)
 
 const router = new Router({
-  // mode: 'history',
+  mode: 'history',
   routes: [
     {
       path: '/admin/passport/login',
@@ -48,9 +49,9 @@ const router = new Router({
 let init = true
 
 router.beforeEach((to, from, next) => {
-  localStorage.setItem('GetDirectAgent', JSON.stringify(to.params))
+  Storage.set(to.name, to.params)
   if (!init) {
-    // window.location.href = to.path
+    window.location.href = to.path
   }
   init = false
   next()
