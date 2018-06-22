@@ -59,6 +59,16 @@
           _self.$refs[formName].validate((valid) => {
             if (valid) {
               let options= {
+                handle: {
+                  success: (Vue, res) => {
+                    let msg = res.data.msg || '操作成功';
+                    Vue.$message({
+                      type: 'success',
+                      message: msg
+                    });
+                    _self.$router.push({path: '/admin/index/list'});
+                  }
+                },
                 data: {
                   username: _self.ruleForm.uname,
                   password: _self.ruleForm.pwd,

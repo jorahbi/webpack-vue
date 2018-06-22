@@ -21,6 +21,11 @@ const set = function (key, value) {
   }
 }
 
+const clear = function (key) {
+  key = format(key)
+  sessionStorage.removeItem(key)
+}
+
 const format = function (argument) {
   try {
     if (typeof argument === 'undefined' || typeof argument === 'function') {
@@ -34,4 +39,4 @@ const format = function (argument) {
   }
 }
 
-export default {get, set}
+export default {get, set, clear}

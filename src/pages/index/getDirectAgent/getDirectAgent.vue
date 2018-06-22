@@ -9,21 +9,7 @@
             </menus>
             <el-container>
                 <el-main>
-                    <el-row class="breadcrumb">
-                        <el-col>
-                            <el-breadcrumb  separator-class="el-icon-arrow-right">
-                                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                                <el-breadcrumb-item :to="{ path: '/admin/index/list' }">代理列表</el-breadcrumb-item>
-                                <el-breadcrumb-item  separator="/"  v-for="(breadcrumb, index) in breadcrumbs" :key="index"
-                                                    v-if="index < breadcrumbs.length - 1">
-                                    <router-link :to="{path: breadcrumb.path}">
-                                        {{ breadcrumb.agentName }} 直属代理列表
-                                    </router-link>
-                                </el-breadcrumb-item>
-                                <el-breadcrumb-item>{{ agentName }} 直属代理列表</el-breadcrumb-item>
-                            </el-breadcrumb>
-                        </el-col>
-                    </el-row>
+                    <Crumbs ref="crumbs" :crumbs="crumbs"></Crumbs>
                     <el-row>
                         <el-col :span="24">
                             <el-table :data="tableData" border="" style="width: 85%" v-loading="loading">
@@ -91,7 +77,11 @@
 <script>
   import api from '../../../common/api';
   import Storage from '../../../common/storage';
+  import Crumbs from '../../../components/crumbs.vue'
   export default {
+    components: {
+      'Crumbs': Crumbs
+    },
     data() {
       return {
         loading: false,
@@ -103,32 +93,47 @@
         pageSize: 10,
         total: 20,
         tableData: [],
-        breadcrumbs: []
+        crumbs: {
+          current: 'getDirectAgent',
+          items: [
+            {
+              path: '#',
+              label: '首页'
+            },
+            {
+              path: '/admin/index/list',
+              label: '代理列表'
+            },
+          ]
+        }
       }
     },
     mounted(){
+
       this.$api = api;
       this.init();
     },
-      // watch: {
-      //     '$route': function (route) {
-      //         console.log(route, 'get_direct_agent')
-      //     },
-      // },
+    watch: {
+      '$route': function (route) {
+        this.agentName = route.params.name;
+        this.agentId = route.params.id;
+        this.getDirectAgent();
+      },
+    },
     methods: {
       init(){
         let params = Storage.get('GetDirectAgent');// JSON.parse(localStorage.getItem('GetDirectAgent'));
         this.agentName = params.name;
         this.agentId = params.id;
-        this.breadcrumbs[this.breadcrumbs.length] = {
-          agentId: this.agentId,
-          agentName: this.agentName
-        };
 
         this.getDirectAgent();
       },
-      getDirectAgent(){
-
+      getDirectAgent() {
+        this.crumbs.items.push({
+          path: '/admin/index/getDirectAgent/' + this.agentId + '/' + this.agentName,
+          label: this.agentName + ' 直属代理列表'
+        });
+        console.log(this.crumbs.items);
         let _self = this;
         let options = {
           data: {
@@ -153,11 +158,8 @@
         this.$api.Post(this, options);
       },
       readChild(agentId, agentName, pageSize){
-        this.breadcrumbs[this.breadcrumbs.length] = {
-          agentId: agentId,
-          agentName: agentName,
-          path:'/admin/index/getDirectAgent/' + agentId + '/' + agentName
-        };
+
+        this.$router.push({path: '/admin/index/getDirectAgent/' + agentId + '/' + agentName});
         this.agentName = agentName;
         this.agentId = agentId;
         this.pageSize = pageSize;

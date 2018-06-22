@@ -8,16 +8,7 @@
             <Menus :menuActive="menuActive"></Menus>
             <el-container>
                 <el-main>
-                    <el-row class="breadcrumb">
-                        <el-col>
-                    <el-breadcrumb separator-class="el-icon-arrow-right">
-                        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                        <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-                        <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-                        <el-breadcrumb-item>活动详情</el-breadcrumb-item>
-                    </el-breadcrumb>
-                        </el-col>
-                    </el-row>
+                    <Crumbs :crumbs="crumbs"></Crumbs>
                     <el-row :gutter="20">
                         <el-col :span="12">
                             <el-form class="demo-ruleForm" label-width="100px">
@@ -43,15 +34,31 @@
 </template>
 <script>
     import AgentList from '../../../components/agent-list.vue'
+    import Crumbs from '../../../components/crumbs.vue'
+
   export default {
     components: {
-        'AgentList': AgentList
+      'AgentList': AgentList,
+      'Crumbs': Crumbs
     },
     data() {
       return {
         menuActive: '1-1',
         name: '',
         keyupTime: 0,
+        crumbs: {
+          current: 'getDirectAgent',
+          items: [
+            {
+              path: '#',
+              label: '主页'
+            },
+            {
+              path: '#',
+              label: '代理列表'
+            }
+          ]
+        }
       }
     },
     methods: {

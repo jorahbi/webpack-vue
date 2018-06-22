@@ -11,7 +11,7 @@ import ResourceList from '../pages/acl/resourceList/resourceList.vue'
 Vue.use(Router)
 
 const router = new Router({
-  mode: 'history',
+  // mode: 'history',
   routes: [
     {
       path: '/admin/passport/login',
@@ -51,7 +51,7 @@ let init = true
 router.beforeEach((to, from, next) => {
   Storage.set(to.name, to.params)
   if (!init) {
-    window.location.href = to.path
+    // window.location.href = to.path
   }
   init = false
   next()
