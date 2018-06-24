@@ -8,7 +8,12 @@
             <Menus :menuActive="menuActive"></Menus>
             <el-container>
                 <el-main>
-                    <Crumbs :crumbs="crumbs"></Crumbs>
+                    <el-row class="breadcrumb">
+                        <Crumbs :crumbs="crumbs"></Crumbs>
+                        <el-col :span="3">
+                            <el-button type="success" plain @click="addRoot">添加总代</el-button>
+                        </el-col>
+                    </el-row>
                     <el-row :gutter="20">
                         <el-col :span="12">
                             <el-form class="demo-ruleForm" label-width="100px">
@@ -51,10 +56,6 @@
           items: [
             {
               path: '#',
-              label: '主页'
-            },
-            {
-              path: '#',
               label: '代理列表'
             }
           ]
@@ -62,6 +63,9 @@
       }
     },
     methods: {
+      addRoot(){
+
+      },
       searchKeyUp(event) {
         let _self = this;
         _self.keyupTime = event.timeStamp;

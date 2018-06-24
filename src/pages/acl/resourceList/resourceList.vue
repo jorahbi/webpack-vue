@@ -9,14 +9,7 @@
             <el-container>
                 <el-main>
                     <el-row class="breadcrumb">
-                        <el-col :span="21">
-                            <el-breadcrumb style="line-height: 40px; height: 40px"
-                                           separator-class="el-icon-arrow-right">
-                                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                                <el-breadcrumb-item>权限管理</el-breadcrumb-item>
-                                <el-breadcrumb-item>资源列表</el-breadcrumb-item>
-                            </el-breadcrumb>
-                        </el-col>
+                        <Crumbs ref="crumbs" :crumbs="crumbs"></Crumbs>
                         <el-col :span="3">
                             <el-button type="success" plain @click="addPermission">添加资源</el-button>
                         </el-col>
@@ -25,11 +18,11 @@
                         <el-col :span="24">
 
                             <el-table :data="tableData" border="" v-loading="loading">
-                                <el-table-column label="ID" prop="id" style="width:5%" type="index">
+                                <el-table-column label="ID" prop="id" style="width:2%">
                                 </el-table-column>
                                 <el-table-column label="标题" prop="title" style="width:5%">
                                 </el-table-column>
-                                <el-table-column label="父资源" prop="action" style="width:10%">
+                                <el-table-column label="上级资源" prop="action" style="width:10%">
                                 </el-table-column>
                                 <el-table-column label="模块" prop="module" style="width:10%">
                                 </el-table-column>
@@ -78,8 +71,9 @@
                         <el-form-item label="标题" prop="title">
                             <el-input v-model="resourceForm.title"></el-input>
                         </el-form-item>
-                        <el-form-item label="父资源" prop="title">
-                            <el-input v-model="resourceForm.title"></el-input>
+                        <el-form-item label="上级资源" prop="pid">
+                            <el-cascader style="width: 100%" placeholder="试试搜索" :options="permissionOptions.options" filterable
+                                         change-on-select v-model="resourceForm.pid"></el-cascader>
                         </el-form-item>
                         <el-form-item label="模块" prop="module">
                             <el-input v-model="resourceForm.module" :value="resourceForm.module"></el-input>
@@ -110,7 +104,7 @@
                             </el-radio-group>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onSubmit('resourceForm')">确 定</el-button>
+                            <el-button type="primary" @click="savePermission('resourceForm')">确 定</el-button>
                         </el-form-item>
                     </el-form>
                 </el-col>
@@ -126,115 +120,184 @@
 
 </style>
 <script>
-    import api from '../../../common/api';
+  import api from '../../../common/api';
+  import Crumbs from '../../../components/crumbs.vue'
 
-    export default {
-        data() {
-            return {
-                loading: false,
-                menuActive: '3-1',
-                currentPage: 1,
-                pageSize: 10,
-                total: 20,
-                tableData: [],
-                formTiele: '添加资源',
-                editDataIndex: 0,
-                dialogFormVisible: false,
-                resourceTitle: '添加资源',
-                resourceForm: {
-                    id: '0',
-                    title: '',
-                    module: '',
-                    controller: '',
-                    action: '',
-                    orderby: '0',
-                    role_id: '0',
-                    status: '0',
-                    menu: '1',
-                    params: ''
-                },
-                rules: {
-                    title: [
-                        {required: true, message: '资源名称', trigger: 'blur'},
-                    ],
-                    module: [
-                        {required: true, message: '请选择模块', trigger: 'blur'}
-                    ],
-                    controller: [
-                        {required: true, message: '请选择控制器', trigger: 'blur'}
-                    ],
-                    action: [
-                        {required: true, message: '请选择方法', trigger: 'blur'}
-                    ],
-                }
-            }
+  export default {
+    components: {
+      'Crumbs': Crumbs
+    },
+    data() {
+      return {
+        crumbs: {
+          current: 'getDirectAgent',
+          items: [
+            {
+              path: '/admin/index/list',
+              label: '资源列表'
+            },
+          ]
         },
-        mounted() {
-            this.$api = api;
-            this.init();
+        loading: false,
+        menuActive: '3-1',
+        currentPage: 1,
+        pageSize: 10,
+        total: 0,
+        tableData: [],
+        formTiele: '添加资源',
+        editDataIndex: 0,
+        dialogFormVisible: false,
+        resourceTitle: '添加资源',
+        resourceForm: {
+          id: '0',
+          title: '',
+          module: '',
+          controller: '',
+          action: '',
+          orderby: '0',
+          role_id: '0',
+          status: '0',
+          pid: 0,
+          menu: '1',
+          params: ''
         },
-        methods: {
-            init() {
-                let _self = this;
-                let options = {
-                    handle: {
-                        success(Vue, res) {
-                            Vue.tableData = res.data.data.data;
-                        }
-                    },
-                    data: {
-                        pageSize: _self.pageSize,
-                        currentPage: _self.currentPage
-                    },
-                    url: '/admin/acl/resourceList'
-                };
-                _self.$api.Post(_self, options);
-            },
-            addPermission() {
-                this.resetForm();
-                this.dialogFormVisible = true;
-            },
-            editPermission(index, row) {
-                let _self = this;
-                _self.formTiele = '修改资源';
-                let options = {
-                    data: {
-                        pid: row.id
-                    },
-                    handle: {
-                        success(res, Vue) {
-                            Vue.resourceForm = res.data.data[0];
-                            _self.dialogFormVisible = true;
-                        }
-                    },
-                    url: '/admin/acl/resourceDetail'
-                };
-                _self.$api.Post(_self, options);
-                _self.editDataIndex = index;
-
-            },
-            resetForm() {
-                this.resourceForm = {
-                    id: '0',
-                    title: '',
-                    module: '',
-                    controller: '',
-                    action: '',
-                    orderby: '0',
-                    role_id: '0',
-                    status: '0',
-                    menu: '1',
-                    params: ''
-                };
-
-                this.dialogFormVisible = false;
-            },
-            handleSizeChange(val) {
-                this.pageSize = val;
-            },
-            handleCurrentChange(val) {
-                this.currentPage = val;
-            }
+        rules: {
+          title: [
+            {required: true, message: '资源名称', trigger: 'blur'},
+          ],
+          module: [
+            {required: true, message: '请选择模块', trigger: 'blur'}
+          ],
+          controller: [
+            {required: true, message: '请选择控制器', trigger: 'blur'}
+          ],
+          action: [
+            {required: true, message: '请选择方法', trigger: 'blur'}
+          ],
+        },
+        permissionOptions: {
+          init: false,
+          options: []
         }
+      }
+    },
+    mounted() {
+      this.$api = api;
+      this.init();
+    },
+    methods: {
+      init() {
+        this.getPermission();
+      },
+      getPermission() {
+        let _self = this;
+        let options = {
+          handle: {
+            success(Vue, res) {
+              Vue.tableData = res.data.data.data;
+              Vue.total = res.data.data.total;
+            }
+          },
+          data: {
+            pageSize: _self.pageSize,
+            currentPage: _self.currentPage
+          },
+          url: '/admin/acl/resourceList'
+        };
+        _self.$api.Post(_self, options);
+      },
+      addPermission() {
+        this.resetForm();
+        this.dialogFormVisible = true;
+        this.permissionTree();
+      },
+      editPermission(index, row) {
+        let _self = this;
+        _self.permissionTree();
+        _self.formTiele = '修改资源';
+        let options = {
+          data: {
+            pid: row.id
+          },
+          handle: {
+            success(Vue, res) {
+              Vue.resourceForm = res.data.data[0];
+              _self.dialogFormVisible = true;
+            }
+          },
+          url: '/admin/acl/resourceDetail'
+        };
+        _self.$api.Post(_self, options);
+        _self.editDataIndex = index;
+
+      },
+      permissionTree(){
+        let _self = this;
+        if (_self.permissionOptions.init) {
+          return false;
+        }
+        let options = {
+          handle: {
+            success(Vue, res) {
+              Vue.permissionOptions.options = res.data.data;
+              Vue.permissionOptions.init = true;
+            }
+          },
+          url: '/admin/acl/permissionTree'
+        };
+        _self.$api.Post(_self, options);
+      },
+      savePermission(formName){
+        let _self = this;
+        _self.$refs[formName].validate((valid) => {
+          if (valid) {
+            let options = {
+              data: _self.resourceForm,
+              handle: {
+                success(Vue, res) {
+                  Vue.$message({
+                    type: 'success',
+                    message: '修改成功'
+                  });
+
+                  let index = Vue.resourceForm.id > 0 ? Vue.editDataIndex : Vue.tableData.length;
+                  Vue.$set(Vue.tableData, index, res.data.data);
+                  _self.resetForm(formName);
+                  _self.dialogFormVisible = false;
+                }
+              },
+              url: '/admin/acl/addResource'
+            };
+            _self.$api.Post(_self, options);
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      resetForm() {
+        this.resourceForm = {
+          id: '0',
+          title: '',
+          module: '',
+          controller: '',
+          action: '',
+          orderby: '0',
+          role_id: '0',
+          status: '0',
+          menu: '1',
+          params: ''
+        };
+
+        this.dialogFormVisible = false;
+      },
+      handleSizeChange(val) {
+        this.pageSize = val;
+      },
+      handleCurrentChange(val) {
+        this.currentPage = val;
+        this.getPermission();
+      }
     }
+  }
 </script>

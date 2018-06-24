@@ -1,15 +1,17 @@
 <template>
     <el-container class="container">
         <el-header>
-            <header>
-            </header>
+            <Header>
+            </Header>
         </el-header>
         <el-container>
             <menus :menuActive="menuActive">
             </menus>
             <el-container>
                 <el-main>
-                    <Crumbs ref="crumbs" :crumbs="crumbs"></Crumbs>
+                    <el-row class="breadcrumb">
+                        <Crumbs ref="crumbs" :crumbs="crumbs"></Crumbs>
+                    </el-row>
                     <el-row>
                         <el-col :span="24">
                             <el-table :data="tableData" border="" style="width: 85%" v-loading="loading">
@@ -91,15 +93,11 @@
         agentId: 0,
         currentPage: 1,
         pageSize: 10,
-        total: 20,
+        total: 0,
         tableData: [],
         crumbs: {
           current: 'getDirectAgent',
           items: [
-            {
-              path: '#',
-              label: '首页'
-            },
             {
               path: '/admin/index/list',
               label: '代理列表'
@@ -117,18 +115,21 @@
       '$route': function (route) {
         this.agentName = route.params.name;
         this.agentId = route.params.id;
+        this.pageSize = 10;
+        this.currentPage = 1;
         this.getDirectAgent();
       },
     },
     methods: {
       init(){
-        let params = Storage.get('GetDirectAgent');// JSON.parse(localStorage.getItem('GetDirectAgent'));
+        let params = Storage.get('GetDirectAgent');
         this.agentName = params.name;
         this.agentId = params.id;
 
         this.getDirectAgent();
       },
       getDirectAgent() {
+        this.crumbs.items.length = 2;
         this.crumbs.items.push({
           path: '/admin/index/getDirectAgent/' + this.agentId + '/' + this.agentName,
           label: this.agentName + ' 直属代理列表'
