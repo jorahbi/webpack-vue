@@ -7,7 +7,7 @@ import DemoList from '../pages/demo/list/list.vue'
 import GetDirectAgent from '../pages/index/getDirectAgent/getDirectAgent.vue'
 import GetPlayerList from '../pages/index/getPlayerList/getPlayerList.vue'
 import ResourceList from '../pages/acl/resourceList/resourceList.vue'
-
+import RoleList from '../pages/acl/roleList/roleList.vue'
 Vue.use(Router)
 
 const router = new Router({
@@ -42,6 +42,11 @@ const router = new Router({
       path: '/admin/acl/resourceList',
       name: 'ResourceList',
       component: ResourceList
+    },
+    {
+      path: '/admin/acl/roleList',
+      name: 'RoleList',
+      component: RoleList
     }
   ]
 })

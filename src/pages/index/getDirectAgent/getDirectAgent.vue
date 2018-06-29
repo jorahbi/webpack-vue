@@ -134,7 +134,6 @@
           path: '/admin/index/getDirectAgent/' + this.agentId + '/' + this.agentName,
           label: this.agentName + ' 直属代理列表'
         });
-        console.log(this.crumbs.items);
         let _self = this;
         let options = {
           data: {

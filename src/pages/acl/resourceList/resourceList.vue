@@ -7,52 +7,34 @@
             <menus :menuActive="menuActive">
             </menus>
             <el-container>
-                <el-main>
+                <el-main id="main">
                     <el-row class="breadcrumb">
                         <Crumbs ref="crumbs" :crumbs="crumbs"></Crumbs>
                         <el-col :span="3">
-                            <el-button type="success" plain @click="addPermission">添加资源</el-button>
+                            <el-button type="success" plain @click="addPermission('resourceForm')">添加资源</el-button>
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-col :span="24">
-
-                            <el-table :data="tableData" border="" v-loading="loading">
-                                <el-table-column label="ID" prop="id" style="width:2%">
-                                </el-table-column>
-                                <el-table-column label="标题" prop="title" style="width:5%">
-                                </el-table-column>
-                                <el-table-column label="上级资源" prop="action" style="width:10%">
-                                </el-table-column>
-                                <el-table-column label="模块" prop="module" style="width:10%">
-                                </el-table-column>
-                                <el-table-column label="控制器" prop="controller" style="width:10%">
-                                </el-table-column>
-                                <el-table-column label="方法" prop="action" style="width:10%">
-                                </el-table-column>
-
-                                <el-table-column label="状态" prop="status" style="width:10%">
-                                </el-table-column>
-                                <el-table-column label="操作" width="500px">
-                                    <template slot-scope="scope">
-                                        <el-button size="mini" @click="editPermission(scope.$index, scope.row)">修改
+                        <el-col :span="20"  class="custom-tree-container">
+                            <el-tree :data="treeData" :clearable="true" v-loading="loading" node-key="id" default-expand-all :expand-on-click-node="false">
+                                <div class="custom-tree-node float-clear" slot-scope="{ node, data }">
+                                    <span >{{ node.label }}</span>
+                                    <div style="float: right">
+                                        <el-button type="warning" plain size="mini" @click="editPermission(node, data)">
+                                        修改
                                         </el-button>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </el-col>
-                        <el-col :span="20">
-                            <div class="block" style="float: right;margin: 20px;">
-                                <el-pagination
-                                        @size-change="handleSizeChange"
-                                        @current-change="handleCurrentChange"
-                                        :current-page="currentPage"
-                                        :page-sizes="[10, 20, 30, 50]"
-                                        :page-size="100"
-                                        layout="total, sizes, prev, pager, next, jumper"
-                                        :total="total">
-                                </el-pagination>
-                            </div>
+                                        <el-button type="danger" plain size="mini" @click="disabled(node, data)" v-if="data.status == '0'">
+                                            禁用
+                                        </el-button>
+                                        <el-button type="danger" plain size="mini" @click="disabled(node, data)" v-else>
+                                            启用
+                                        </el-button>
+                                        <el-button type="danger" plain size="mini" @click="remove(node, data)">
+                                        删除
+                                        </el-button>
+                                    </div>
+                                </div>
+                            </el-tree>
                         </el-col>
                     </el-row>
                 </el-main>
@@ -71,9 +53,9 @@
                         <el-form-item label="标题" prop="title">
                             <el-input v-model="resourceForm.title"></el-input>
                         </el-form-item>
-                        <el-form-item label="上级资源" prop="pid">
+                        <el-form-item label="上级资源" prop="path">
                             <el-cascader style="width: 100%" placeholder="试试搜索" :options="permissionOptions.options" filterable
-                                         change-on-select v-model="resourceForm.pid"></el-cascader>
+                                         change-on-select v-model="resourceForm.path"></el-cascader>
                         </el-form-item>
                         <el-form-item label="模块" prop="module">
                             <el-input v-model="resourceForm.module" :value="resourceForm.module"></el-input>
@@ -122,7 +104,6 @@
 <script>
   import api from '../../../common/api';
   import Crumbs from '../../../components/crumbs.vue'
-
   export default {
     components: {
       'Crumbs': Crumbs
@@ -133,7 +114,7 @@
           current: 'getDirectAgent',
           items: [
             {
-              path: '/admin/index/list',
+              path: '/admin/acl/resourceList',
               label: '资源列表'
             },
           ]
@@ -141,11 +122,11 @@
         loading: false,
         menuActive: '3-1',
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 999999,
         total: 0,
-        tableData: [],
-        formTiele: '添加资源',
-        editDataIndex: 0,
+        treeData: [],
+
+        editNode: {},
         dialogFormVisible: false,
         resourceTitle: '添加资源',
         resourceForm: {
@@ -157,7 +138,7 @@
           orderby: '0',
           role_id: '0',
           status: '0',
-          pid: 0,
+          path: [],
           menu: '1',
           params: ''
         },
@@ -176,7 +157,6 @@
           ],
         },
         permissionOptions: {
-          init: false,
           options: []
         }
       }
@@ -191,56 +171,52 @@
       },
       getPermission() {
         let _self = this;
+
         let options = {
           handle: {
             success(Vue, res) {
-              Vue.tableData = res.data.data.data;
-              Vue.total = res.data.data.total;
+              Vue.treeData = res.data.data;
             }
-          },
-          data: {
-            pageSize: _self.pageSize,
-            currentPage: _self.currentPage
           },
           url: '/admin/acl/resourceList'
         };
         _self.$api.Post(_self, options);
       },
       addPermission() {
-        this.resetForm();
+
         this.dialogFormVisible = true;
-        this.permissionTree();
+        this.permissionTree(0);
       },
-      editPermission(index, row) {
+      editPermission(node, data) {
         let _self = this;
-        _self.permissionTree();
-        _self.formTiele = '修改资源';
+        _self.permissionTree(data.id);
+        _self.resourceTitle = '修改资源';
         let options = {
           data: {
-            pid: row.id
+            id: data.id
           },
           handle: {
             success(Vue, res) {
               Vue.resourceForm = res.data.data[0];
+              Vue.resourceForm.path = Vue.resourceForm.path.split(',');
               _self.dialogFormVisible = true;
             }
           },
           url: '/admin/acl/resourceDetail'
         };
         _self.$api.Post(_self, options);
-        _self.editDataIndex = index;
+        _self.editNode = node;
 
       },
-      permissionTree(){
+      permissionTree(id){
         let _self = this;
-        if (_self.permissionOptions.init) {
-          return false;
-        }
         let options = {
+          data: {
+            id: id
+          },
           handle: {
             success(Vue, res) {
-              Vue.permissionOptions.options = res.data.data;
-              Vue.permissionOptions.init = true;
+              Vue.permissionOptions.options = [{label: '--无--', value: 0}].concat(res.data.data);
             }
           },
           url: '/admin/acl/permissionTree'
@@ -259,10 +235,8 @@
                     type: 'success',
                     message: '修改成功'
                   });
-
-                  let index = Vue.resourceForm.id > 0 ? Vue.editDataIndex : Vue.tableData.length;
-                  Vue.$set(Vue.tableData, index, res.data.data);
-                  _self.resetForm(formName);
+                  Vue.getPermission();
+                  //_self.resetForm();
                   _self.dialogFormVisible = false;
                 }
               },
@@ -275,28 +249,15 @@
           }
         });
       },
+      remove(node, data) {
+        console.log(node, data);
+        /*const parent = node.parent;
+        const children = parent.data.children || parent.data;
+        const index = children.findIndex(d => d.id === data.id);
+        children.splice(index, 1);*/
+      },
       resetForm() {
-        this.resourceForm = {
-          id: '0',
-          title: '',
-          module: '',
-          controller: '',
-          action: '',
-          orderby: '0',
-          role_id: '0',
-          status: '0',
-          menu: '1',
-          params: ''
-        };
-
-        this.dialogFormVisible = false;
-      },
-      handleSizeChange(val) {
-        this.pageSize = val;
-      },
-      handleCurrentChange(val) {
-        this.currentPage = val;
-        this.getPermission();
+        this.resourceForm.resetFields();
       }
     }
   }

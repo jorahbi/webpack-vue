@@ -25,8 +25,8 @@
                     </template>
                     <el-menu-item-group title="权限">
                         <el-menu-item index="3-1" :route="{ path: '/admin/acl/resourceList' }">资源管理</el-menu-item>
-                        <el-menu-item index="3-2" :route="{ path: '/admin/index/list' }">角色管理</el-menu-item>
-                        <el-menu-item index="3-2" :route="{ path: '/admin/index/list' }">管理员管理</el-menu-item>
+                        <el-menu-item index="3-2" :route="{ path: '/admin/acl/roleList' }">角色管理</el-menu-item>
+                        <el-menu-item index="3-3" :route="{ path: '/admin/index/list' }">管理员管理</el-menu-item>
                     </el-menu-item-group>
 
                 </el-submenu>

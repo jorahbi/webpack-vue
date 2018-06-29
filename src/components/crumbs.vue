@@ -1,6 +1,6 @@
 <template>
 
-    <el-col :span="21">
+    <el-col :span="18">
         <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item separator="/" :to="{path: crumb.path}" v-for="(crumb, index) in breadcrumb"
                                 :key="index"> {{ crumb.label }}
