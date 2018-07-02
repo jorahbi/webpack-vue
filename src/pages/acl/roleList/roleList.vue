@@ -55,18 +55,7 @@
                             <el-input v-model="resourceForm.desc" :value="resourceForm.desc"></el-input>
                         </el-form-item>
                         <el-form-item label="权限">
-                            <el-transfer
-                                    filterable
-                                    :filter-method="filterMethod"
-                                    filter-placeholder="请输入城市拼音"
-                                    v-model="hold"
-                                    :render-content="renderFunc"
-                                    @left-check-change="leftChange"
-                                    @change="handleChange"
-                                    :left-default-checked="leftChecked"
-                                    :right-default-checked="rightChecked"
-                                    :data="permissions">
-                            </el-transfer>
+                            <RoleTree ref="roleTree"></RoleTree>
                         </el-form-item>
                         <el-form-item label="启用">
                             <el-radio-group v-model="resourceForm.status">
@@ -87,27 +76,20 @@
 
 </template>
 <style>
-    @import "../../../style/scss/_list.sass";
+    @import "../../../style/scss/_role_list.sass";
 
 </style>
 <script>
   import api from '../../../common/api';
   import Crumbs from '../../../components/crumbs.vue'
+  import RoleTree from '../../../components/role-tree.vue'
   export default {
     components: {
-      'Crumbs': Crumbs
+      'Crumbs': Crumbs,
+      'RoleTree': RoleTree
     },
     data() {
       return {
-        permissions: [],
-        hold: ['6', '7'],
-        filterMethod(query, item) {
-          return item.label.indexOf(query) > -1;
-        },
-        renderFunc(h, option) {
-          return <span style={{'padding-left': option.level * 15 + 'px'}} title={ option.label }> { option.label }</span>;
-        },
-        permissionInit: false,
         dialogFormVisible: false,
         crumbs: {
           current: 'getDirectAgent',
@@ -124,8 +106,6 @@
             {required: true, message: '资源名称', trigger: 'blur'},
           ]
         },
-        leftChecked: [],
-        rightChecked: [],
         resourceTitle: '添加角色',
         tableData: [],
         loading: false,
@@ -161,41 +141,16 @@
         };
         this.$api.Post(this, options);
       },
-      leftChange(all, current) {
-        console.log(all, current)
-        //this.leftChecked = ['1', '2'];
-        // Array.from(new Set([1, 1, 1, 2, 3, 2, 4]));
-        //console.log(arguments)
-      },
-      handleChange(){
-
-      },
       modifyRole (formName, item) {
-        this.dialogFormVisible = true;
-        this.getPermission();
-      },
-      getPermission () {
         let _self = this;
-        let options = {
-          url: '/admin/acl/permissions',
-          data: {
-            type: 1
-          },
-          handle: {
-            success: (Vue, res) => {
-              let msg = res.data.msg || '操作成功';
-              Vue.$message({
-                type: 'success',
-                message: msg
-              });
-              _self.permissions = res.data.data;
-              _self.rightChecked = ['6', '7'];
-              _self.leftChecked = ['1', '2'];
-            }
-          }
-        };
-        this.$api.Post(this, options);
+        _self.dialogFormVisible = true;
+        _self.$nextTick(function(){
+          _self.$refs.roleTree.getPermission();
+        });
+
+        //this.$refs.roleTree.getPermission();
       },
+
       saveRole() {
         console.log(this.value2);
       }
